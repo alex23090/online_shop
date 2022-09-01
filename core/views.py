@@ -25,6 +25,24 @@ class HomeView(ListView):
     template_name = "home-page.html"
 
 
+def shirts_filter(request):
+    shirts = Item.objects.filter(category='S')
+    context = {'object_list': shirts}
+    return render(request, 'home-page.html', context)
+
+
+def sport_wear_filter(request):
+    sport_wears = Item.objects.filter(category='SW')
+    context = {'object_list': sport_wears}
+    return render(request, 'home-page.html', context)
+
+
+def outwear_filter(request):
+    outwears = Item.objects.filter(category='OW')
+    context = {'object_list': outwears}
+    return render(request, 'home-page.html', context)
+
+
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
