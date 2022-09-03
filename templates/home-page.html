@@ -39,10 +39,11 @@
         </ul>
         <!-- Links -->
 
-        <form class="form-inline">
+        <form class="form-inline" method="GET" action="">
           <div class="md-form my-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="searched" {% if searched %}value="{{ searched }}"{% endif %}>
           </div>
+          <button type="submit" class="btn btn-outline-white">search</button>
         </form>
       </div>
       <!-- Collapsible content -->

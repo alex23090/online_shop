@@ -8,10 +8,12 @@ from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from .forms import CheckoutForm, CouponForm, RefundForm
 from .models import Item, Order, OrderItem, Address, Payment, Coupon, Refund, UserProfile
+from django.db.models import Q
 
 import random
 import string
 import stripe
+
 stripe.api_key = settings.SECRET_KEY
 
 
@@ -19,27 +21,48 @@ def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
 
 
-class HomeView(ListView):
+class HomeView(View):
     model = Item
     paginate_by = 2
     template_name = "home-page.html"
 
+    def get(self, *args, **kwargs):
+        searched = self.request.GET.get('searched', False)
+        if searched:
+            items = Item.objects.filter(title__contains=searched)
+        else:
+            items = Item.objects.all()
+        context = {'object_list': items, 'searched': searched}
+        return render(self.request, 'home-page.html', context)
+
 
 def shirts_filter(request):
     shirts = Item.objects.filter(category='S')
-    context = {'object_list': shirts}
+    if request.method == 'GET':
+        searched = request.GET.get('searched', False)
+        if searched:
+            shirts = Item.objects.filter(title__contains=searched, category='S')
+    context = {'object_list': shirts, 'searched': searched}
     return render(request, 'home-page.html', context)
 
 
 def sport_wear_filter(request):
     sport_wears = Item.objects.filter(category='SW')
-    context = {'object_list': sport_wears}
+    if request.method == 'GET':
+        searched = request.GET.get('searched', False)
+        if searched:
+            sport_wears = Item.objects.filter(title__contains=searched, category='SW')
+    context = {'object_list': sport_wears, 'searched': searched}
     return render(request, 'home-page.html', context)
 
 
 def outwear_filter(request):
     outwears = Item.objects.filter(category='OW')
-    context = {'object_list': outwears}
+    if request.method == 'GET':
+        searched = request.GET.get('searched', False)
+        if searched:
+            outwears = Item.objects.filter(title__contains=searched, category='OW')
+    context = {'object_list': outwears, 'searched': searched}
     return render(request, 'home-page.html', context)
 
 
@@ -50,7 +73,7 @@ class OrderSummaryView(LoginRequiredMixin, View):
             context = {'object': order}
             return render(self.request, "order_summary.html", context)
         except ObjectDoesNotExist:
-            messages.error(self.request,"You do not have an active order")
+            messages.error(self.request, "You do not have an active order")
             return redirect("/")
 
 
