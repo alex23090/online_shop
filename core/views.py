@@ -8,7 +8,8 @@ from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from .forms import CheckoutForm, CouponForm, RefundForm
 from .models import Item, Order, OrderItem, Address, Payment, Coupon, Refund, UserProfile
-from django.db.models import Q
+from django.core.paginator import Paginator
+from .utils import paginateItems
 
 import random
 import string
@@ -22,16 +23,15 @@ def create_ref_code():
 
 
 class HomeView(View):
-    model = Item
-    paginate_by = 2
-    template_name = "home-page.html"
-
     def get(self, *args, **kwargs):
         searched = self.request.GET.get('searched', False)
         if searched:
             items = Item.objects.filter(title__contains=searched)
         else:
             items = Item.objects.all()
+
+        items = paginateItems(self.request, items, 2)
+
         context = {'object_list': items, 'searched': searched}
         return render(self.request, 'home-page.html', context)
 
@@ -42,6 +42,9 @@ def shirts_filter(request):
         searched = request.GET.get('searched', False)
         if searched:
             shirts = Item.objects.filter(title__contains=searched, category='S')
+
+    shirts = paginateItems(request, shirts, 2)
+
     context = {'object_list': shirts, 'searched': searched}
     return render(request, 'home-page.html', context)
 
@@ -52,6 +55,9 @@ def sport_wear_filter(request):
         searched = request.GET.get('searched', False)
         if searched:
             sport_wears = Item.objects.filter(title__contains=searched, category='SW')
+
+    sport_wears = paginateItems(request, sport_wears, 2)
+
     context = {'object_list': sport_wears, 'searched': searched}
     return render(request, 'home-page.html', context)
 
@@ -62,6 +68,9 @@ def outwear_filter(request):
         searched = request.GET.get('searched', False)
         if searched:
             outwears = Item.objects.filter(title__contains=searched, category='OW')
+
+    outwears = paginateItems(request, outwears, 2)
+
     context = {'object_list': outwears, 'searched': searched}
     return render(request, 'home-page.html', context)
 
